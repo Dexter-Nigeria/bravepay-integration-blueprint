@@ -19,6 +19,15 @@ The explainer covers the same arrangement in ordinary language: who does what, h
 BankOne reaches NIBSS, how BravePay reaches BankOne, and why the HTTP/HTTPS question
 matters. No technical background needed.
 
+## Public version
+
+A general-audience version of the explainer is published openly at
+**https://dexter-nigeria.github.io/how-bravepay-moves-money/**
+(repo: `Dexter-Nigeria/how-bravepay-moves-money`).
+
+It omits the vendor-specific security findings and internal system detail kept here.
+Edits to the explainer should be applied to both, or made here first and ported.
+
 ## What the blueprint is
 
 A build-ready document for the engineering team, not an overview. It covers:
