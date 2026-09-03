@@ -3,7 +3,10 @@
 Technical integration blueprint for running BravePay on **BankOne (Qore)** as the core
 banking engine, with **NIBSS** providing the payment rails.
 
-**Read it here:** _(GitHub Pages URL once published)_ — or open `index.html` locally.
+**Read it here:** https://claude.ai/code/artifact/45807891-1789-400b-98ad-7c31c00897b0
+(private — visible to the owner and anyone the link is deliberately shared with)
+
+Or open `index.html` locally; it is a single self-contained file.
 
 ## What this is
 
