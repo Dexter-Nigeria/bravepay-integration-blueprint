@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How BravePay Moves Money</title>
+<meta name="description" content="A plain-language explanation of how BravePay, BankOne and NIBSS work together to move money between banks in Nigeria.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  --paper:#F8F6F2; --card:#FFFFFF; --card-2:#F0EDE7;
+  --ink:#1A1715; --ink-2:#4A423D; --ink-3:#786D66;
+  --rule:#E2DDD4; --rule-2:#CBC2B6;
+  --accent:#6E2436; --accent-2:#8C3348; --accent-soft:#F3E7EA;
+  --go:#2E6B4A; --go-soft:#E4EFE8;
+  --wait:#9A6511; --wait-soft:#F7EEDD;
+  --stop:#9E2F2F; --stop-soft:#F7E6E4;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#15120F; --card:#1E1A16; --card-2:#262019;
+    --ink:#F2EDE6; --ink-2:#C6BBB0; --ink-3:#988D83;
+    --rule:#2E2721; --rule-2:#463C33;
+    --accent:#E8A0AE; --accent-2:#F0B6C1; --accent-soft:#332226;
+    --go:#7FCFA1; --go-soft:#1A2B21;
+    --wait:#E0AE5C; --wait-soft:#302516;
+    --stop:#EE9089; --stop-soft:#331F1D;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15120F; --card:#1E1A16; --card-2:#262019;
+  --ink:#F2EDE6; --ink-2:#C6BBB0; --ink-3:#988D83;
+  --rule:#2E2721; --rule-2:#463C33;
+  --accent:#E8A0AE; --accent-2:#F0B6C1; --accent-soft:#332226;
+  --go:#7FCFA1; --go-soft:#1A2B21;
+  --wait:#E0AE5C; --wait-soft:#302516;
+  --stop:#EE9089; --stop-soft:#331F1D;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:Karla,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:17.5px; line-height:1.66;
+}
+.page{max-width:47rem; margin:0 auto; padding:0 1.2rem 6rem}
+@media (min-width:700px){.page{padding:0 2rem 7rem}}
+a{color:var(--accent-2); text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:3px}
+
+/* masthead */
+.mast{padding:4rem 0 2.6rem; border-bottom:1px solid var(--rule-2); margin-bottom:1rem}
+.eyebrow{
+  font-size:.7rem; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--accent-2); font-weight:700; margin:0 0 1.1rem;
+}
+h1{
+  font-family:Newsreader,Georgia,serif; font-weight:600; font-size:clamp(2.3rem,7vw,3.7rem);
+  line-height:1.03; letter-spacing:-.02em; margin:0 0 1.2rem; text-wrap:balance; max-width:14ch;
+}
+.deck{
+  font-family:Newsreader,Georgia,serif; font-size:clamp(1.15rem,2.6vw,1.42rem);
+  line-height:1.5; color:var(--ink-2); margin:0 0 1.6rem; max-width:40ch;
+}
+.byline{font-size:.83rem; color:var(--ink-3); letter-spacing:.03em}
+
+section{padding:3rem 0 .5rem; scroll-margin-top:1rem}
+h2{
+  font-family:Newsreader,Georgia,serif; font-weight:600; font-size:clamp(1.6rem,4vw,2.15rem);
+  line-height:1.15; letter-spacing:-.015em; margin:0 0 1.1rem; text-wrap:balance; max-width:20ch;
+}
+h3{
+  font-family:Newsreader,Georgia,serif; font-weight:600; font-size:1.28rem;
+  line-height:1.3; margin:2.4rem 0 .7rem; text-wrap:balance;
+}
+p{margin:0 0 1.15rem}
+ul,ol{margin:0 0 1.25rem; padding-left:1.3rem}
+li{margin:0 0 .62rem}
+li::marker{color:var(--accent-2)}
+strong{font-weight:700}
+.lead{font-size:1.08rem; color:var(--ink-2)}
+
+/* the three players */
+.players{display:grid; gap:1rem; margin:1.8rem 0 2.2rem}
+@media (min-width:620px){.players{grid-template-columns:repeat(3,1fr)}}
+.player{
+  background:var(--card); border:1px solid var(--rule); border-radius:10px;
+  padding:1.2rem 1.15rem; border-top:4px solid var(--accent);
+}
+.player .who{
+  font-family:Newsreader,Georgia,serif; font-size:1.18rem; font-weight:600; margin:0 0 .1rem;
+}
+.player .role{
+  font-size:.72rem; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--accent-2); font-weight:700; margin:0 0 .6rem;
+}
+.player p{font-size:.94rem; margin:0; color:var(--ink-2); line-height:1.55}
+
+/* callouts */
+.box{
+  margin:1.9rem 0; padding:1.25rem 1.35rem; border-radius:10px;
+  background:var(--card); border:1px solid var(--rule); border-left:4px solid var(--accent);
+}
+.box h4{
+  font-family:Newsreader,Georgia,serif; font-weight:600; font-size:1.1rem;
+  margin:0 0 .55rem; color:var(--accent-2);
+}
+.box p:last-child,.box ul:last-child{margin-bottom:0}
+.box.good{background:var(--go-soft); border-color:var(--rule); border-left-color:var(--go)}
+.box.good h4{color:var(--go)}
+.box.wait{background:var(--wait-soft); border-color:var(--rule); border-left-color:var(--wait)}
+.box.wait h4{color:var(--wait)}
+.box.warn{background:var(--stop-soft); border-color:var(--rule); border-left-color:var(--stop)}
+.box.warn h4{color:var(--stop)}
+
+/* numbered walkthrough */
+.steps{list-style:none; margin:1.7rem 0 2rem; padding:0; counter-reset:st}
+.steps li{
+  counter-increment:st; position:relative; padding:0 0 1.4rem 3.1rem; margin:0;
+  border-left:1px solid var(--rule-2); 
+}
+.steps li:last-child{border-left-color:transparent; padding-bottom:0}
+.steps li::before{
+  content:counter(st); position:absolute; left:-1.05rem; top:-.15rem;
+  width:2.1rem; height:2.1rem; border-radius:50%;
+  background:var(--accent); color:var(--paper);
+  font-size:.86rem; font-weight:700; display:grid; place-items:center;
+}
+.steps .st-t{font-weight:700; display:block; margin-bottom:.15rem}
+.steps p{margin:0; color:var(--ink-2); font-size:.97rem}
+
+/* simple comparison */
+.split{display:grid; gap:1rem; margin:1.8rem 0 2rem}
+@media (min-width:620px){.split{grid-template-columns:1fr 1fr}}
+.half{background:var(--card); border:1px solid var(--rule); border-radius:10px; padding:1.15rem 1.2rem}
+.half h4{margin:0 0 .7rem; font-family:Newsreader,serif; font-size:1.1rem; font-weight:600}
+.half ul{margin:0; padding-left:1.15rem}
+.half li{font-size:.95rem; color:var(--ink-2); margin-bottom:.45rem}
+.tick{color:var(--go); font-weight:700}
+.cross{color:var(--stop); font-weight:700}
+
+figure{margin:2.2rem 0 2.4rem}
+figure svg{display:block; width:100%; height:auto; color:var(--ink)}
+figcaption{margin-top:.85rem; font-size:.9rem; color:var(--ink-3); line-height:1.55}
+.scroll{overflow-x:auto}
+.scroll svg{min-width:560px}
+
+.pull{
+  font-family:Newsreader,Georgia,serif; font-size:clamp(1.3rem,3.4vw,1.72rem);
+  line-height:1.32; color:var(--accent-2); border-top:1px solid var(--rule-2);
+  border-bottom:1px solid var(--rule-2); padding:1.5rem 0; margin:2.4rem 0; text-wrap:balance;
+}
+
+dl.gloss{margin:1.6rem 0 2rem}
+dl.gloss dt{font-weight:700; margin-top:1.05rem}
+dl.gloss dd{margin:.15rem 0 0; color:var(--ink-2); font-size:.97rem}
+
+footer{
+  margin-top:4rem; padding-top:2rem; border-top:1px solid var(--rule-2);
+  font-size:.88rem; color:var(--ink-3);
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="mast">
+  <p class="eyebrow">BravePay · plain-language briefing</p>
+  <h1>How BravePay moves money</h1>
+  <p class="deck">Three organisations have to cooperate before a customer can send ₦5,000 to a friend at another bank. Here is what each one does, in ordinary words.</p>
+  <p class="byline">For the BravePay team · 3 September 2026 · no technical background needed</p>
+</header>
+
+<section id="short">
+<h2>The short version</h2>
+<p class="lead">Yes — customers will be able to send money from the BravePay app to any Nigerian bank, and receive money from any Nigerian bank.</p>
+<p>BravePay is the app people see and touch. <strong>BankOne</strong> is the banking engine underneath it that actually holds accounts and moves money. <strong>NIBSS</strong> is the national system that carries money between different banks. BravePay talks to BankOne; BankOne talks to NIBSS; NIBSS reaches every other bank in the country.</p>
+<p>That is the whole arrangement. Everything below explains it in more detail.</p>
+</section>
+
+<section id="who">
+<h2>Who does what</h2>
+
+<div class="players">
+  <div class="player">
+    <p class="who">BravePay</p>
+    <p class="role">The shop</p>
+    <p>What customers see. The app, the login, the invoices, payroll, expense tracking, notifications, support. It knows who the customer is and what they want to do.</p>
+  </div>
+  <div class="player">
+    <p class="who">BankOne</p>
+    <p class="role">The vault and the books</p>
+    <p>The licensed banking engine. It holds the real accounts, the real balances, and the official record of every naira. It also produces the reports the regulator requires.</p>
+  </div>
+  <div class="player">
+    <p class="who">NIBSS</p>
+    <p class="role">The road between banks</p>
+    <p>The national infrastructure every Nigerian bank connects to. When money leaves one bank for another, it travels on NIBSS.</p>
+  </div>
+</div>
+
+<p>A useful way to hold it in your head: <strong>BravePay is the shopfront, BankOne is the back office, NIBSS is the road network.</strong> A customer never sees BankOne or NIBSS, in the same way you never see the warehouse behind a shop, or the roads a delivery van uses.</p>
+
+<div class="box">
+  <h4>Why not just build the banking part ourselves?</h4>
+  <p>Because holding customer deposits is a licensed, examined activity. A regulator will ask to see a proper double-entry ledger, an audit trail, and monthly returns filed on time. BankOne already has all of that, built for Nigerian microfinance banks. Building it ourselves would take years and would have to be defended to the CBN. <strong>Renting it is faster, cheaper and safer.</strong></p>
+</div>
+</section>
+
+<section id="rails">
+<h2>How BankOne connects to NIBSS</h2>
+
+<p>This is the part people find surprising: <strong>BravePay has no connection to NIBSS at all, and does not need one.</strong></p>
+
+<p>Getting your own direct connection to NIBSS is a serious undertaking. You need certification, your own bank code, a settlement bank holding money as security, and technical infrastructure that runs to a banking standard. It takes months and costs a great deal.</p>
+
+<p>BankOne already has all of this. Hundreds of financial institutions sit behind BankOne's single connection. When BravePay sends a transfer instruction to BankOne, BankOne puts it onto NIBSS on our behalf. We inherit the connection rather than building one.</p>
+
+<figure class="scroll">
+<svg viewBox="0 0 640 190" role="img" aria-label="A chain of four boxes: BravePay app, BravePay systems, BankOne, NIBSS, leading to other Nigerian banks, with the note that BravePay never touches NIBSS directly.">
+  <defs>
+    <marker id="e1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g font-family="Karla, sans-serif" font-size="12.5" fill="currentColor">
+    <rect x="8" y="58" width="118" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <text x="67" y="82" text-anchor="middle" font-weight="700">BravePay</text>
+    <text x="67" y="99" text-anchor="middle" font-size="10.5" opacity=".65">the app</text>
+
+    <rect x="166" y="58" width="118" height="56" rx="8" fill="none" stroke="#6E2436" stroke-width="2"/>
+    <text x="225" y="82" text-anchor="middle" font-weight="700" fill="#6E2436">BankOne</text>
+    <text x="225" y="99" text-anchor="middle" font-size="10.5" fill="#6E2436" opacity=".8">accounts &amp; balances</text>
+
+    <rect x="324" y="58" width="118" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <text x="383" y="82" text-anchor="middle" font-weight="700">NIBSS</text>
+    <text x="383" y="99" text-anchor="middle" font-size="10.5" opacity=".65">national rails</text>
+
+    <rect x="482" y="58" width="150" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="557" y="82" text-anchor="middle" font-weight="700">Other banks</text>
+    <text x="557" y="99" text-anchor="middle" font-size="10.5" opacity=".65">GTB, Opay, Kuda…</text>
+
+    <line x1="126" y1="86" x2="164" y2="86" stroke="currentColor" stroke-width="1.5" marker-end="url(#e1)"/>
+    <line x1="284" y1="86" x2="322" y2="86" stroke="currentColor" stroke-width="1.5" marker-end="url(#e1)"/>
+    <line x1="442" y1="86" x2="480" y2="86" stroke="currentColor" stroke-width="1.5" marker-end="url(#e1)"/>
+
+    <path d="M67 52 C 67 20, 383 20, 383 52" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".4"/>
+    <text x="225" y="20" text-anchor="middle" font-size="11" opacity=".55">no direct connection — and none needed</text>
+
+    <text x="225" y="146" text-anchor="middle" font-size="11" fill="#6E2436">we build and control this link</text>
+    <line x1="140" y1="128" x2="310" y2="128" stroke="#6E2436" stroke-width="1.5"/>
+    <line x1="140" y1="124" x2="140" y2="132" stroke="#6E2436" stroke-width="1.5"/>
+    <line x1="310" y1="124" x2="310" y2="132" stroke="#6E2436" stroke-width="1.5"/>
+
+    <text x="483" y="146" text-anchor="middle" font-size="11" opacity=".6">already exists — we inherit it</text>
+    <line x1="345" y1="128" x2="620" y2="128" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+    <line x1="345" y1="124" x2="345" y2="132" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+    <line x1="620" y1="124" x2="620" y2="132" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+  </g>
+</svg>
+<figcaption>The only piece of this chain BravePay has to build is the first link. Everything from BankOne rightwards already exists and works today for hundreds of other institutions.</figcaption>
+</figure>
+
+<div class="box wait">
+  <h4>One thing that still has to be arranged</h4>
+  <p>This is a commercial and regulatory matter, not a technical one. For customers' transfers to work, <strong>our microfinance bank has to be properly registered on the NIBSS system</strong> — with a bank code, a settlement bank, and money deposited as security. That usually comes as part of the BankOne arrangement, but it must be confirmed in writing before launch. No amount of good engineering substitutes for it.</p>
+</div>
+</section>
+
+<section id="link">
+<h2>How BravePay connects to BankOne</h2>
+
+<p>Over the internet, using the same basic technology as a website.</p>
+
+<p>When BravePay needs something from BankOne — check a balance, open an account, send a transfer — it sends a message over the internet to a BankOne address, and BankOne sends a message back. That exchange is called an <strong>API</strong>, and it travels over <strong>HTTP</strong>, the same protocol your browser uses to load a web page.</p>
+
+<p>Think of it as writing to BankOne and getting a reply, thousands of times a day, in fractions of a second.</p>
+
+<div class="box">
+  <h4>What travels along that link</h4>
+  <ul>
+    <li>"Open an account for this customer" → BankOne replies with a real account number.</li>
+    <li>"What is the balance on this account?" → BankOne replies with the figure.</li>
+    <li>"Whose account number is 0123456789 at GTBank?" → BankOne replies with the name.</li>
+    <li>"Send ₦5,000 from this account to that one" → BankOne does it and replies with the outcome.</li>
+  </ul>
+</div>
+
+<h3>The important detail: HTTP versus HTTPS</h3>
+
+<p>Those two extra letters matter more than anything else in this document.</p>
+
+<div class="split">
+  <div class="half">
+    <h4><span class="cross">✕</span> HTTP — a postcard</h4>
+    <ul>
+      <li>Anyone who handles it along the way can read every word.</li>
+      <li>That includes customer names, dates of birth, BVNs, account numbers.</li>
+      <li>It can also include the password our systems use to prove who they are.</li>
+    </ul>
+  </div>
+  <div class="half">
+    <h4><span class="tick">✓</span> HTTPS — a sealed envelope</h4>
+    <ul>
+      <li>Scrambled from end to end. Handlers can carry it but cannot read it.</li>
+      <li>This is what every bank, and every serious website, uses.</li>
+      <li>The <em>S</em> stands for secure, and it is the difference.</li>
+    </ul>
+  </div>
+</div>
+
+<p><strong>BankOne's published documentation lists its live addresses as HTTP — the postcard.</strong> Out of the addresses printed in their guide, 94 are HTTP and only one is HTTPS. On top of that, one half of their system carries our password inside the web address itself, which is roughly like writing the key to the safe on the outside of the envelope: every system that handles the message keeps a copy in its records without anyone intending it.</p>
+
+<div class="box warn">
+  <h4>What we are doing about this</h4>
+  <p>This is a written question for Qore, BankOne's owner, and it must be answered before we go live. Most likely their documentation is simply out of date and the secure version works fine — that is common. But <strong>"probably fine" is not good enough for customer data</strong>, and it needs to be confirmed in writing rather than assumed.</p>
+  <p>Two reasons this is not optional. The CBN's cybersecurity rules for institutions like ours have applied since January 2023. And from <strong>1 January 2027</strong>, Nigerian payment data must be stored and handled inside Nigeria — a rule that names microfinance banks specifically. Sending customer records around on postcards sits badly against both.</p>
+  <p>Meanwhile, our own side is built so that all traffic to BankOne leaves through a single controlled exit point. That gives us one place to enforce the secure version, one place to make sure passwords are never written into our logs, and one place to shut off if anything looks wrong.</p>
+</div>
+</section>
+
+<section id="sending">
+<h2>Sending money to another bank</h2>
+<p>Here is what actually happens when a customer sends ₦5,000 to a friend at GTBank. It takes a few seconds.</p>
+
+<ol class="steps">
+  <li><span class="st-t">The customer enters the details</span><p>Account number, bank, amount. So far nothing has left the app.</p></li>
+  <li><span class="st-t">We check who owns that account</span><p>BravePay asks BankOne, BankOne asks NIBSS, NIBSS asks GTBank. The real account name comes back.</p></li>
+  <li><span class="st-t">The customer confirms the name</span><p>They see the name on screen and check it is who they meant. This step prevents most money-sent-to-the-wrong-person disputes.</p></li>
+  <li><span class="st-t">We write down what they asked for</span><p>Before anything moves, BravePay records the instruction. This sounds unremarkable and is the single most important safety step — see below.</p></li>
+  <li><span class="st-t">We instruct BankOne to send</span><p>BankOne debits the customer's account and places the transfer onto NIBSS.</p></li>
+  <li><span class="st-t">NIBSS delivers it</span><p>GTBank credits the friend's account, usually within seconds.</p></li>
+  <li><span class="st-t">We confirm and notify</span><p>Once BankOne confirms it went through, the app updates and the customer gets a notification.</p></li>
+</ol>
+
+<div class="box good">
+  <h4>Why step 4 matters so much</h4>
+  <p>Sometimes we send an instruction and no reply comes back — a network drops, a system is slow. We are then in the worst position in banking: <em>we do not know whether the money moved.</em></p>
+  <p>Because we wrote the instruction down first, we can go back and ask BankOne "what happened to this one?" until we get a definite answer. Without that record, the instruction would simply vanish, and a customer would be left either missing money or wondering whether to send it again.</p>
+  <p><strong>The rule that follows: we never give the money back to the customer until we know for certain the transfer failed.</strong> Returning it early feels helpful and can result in the money being sent twice.</p>
+</div>
+
+<p class="pull">The app says “sending”, not “sent”, until we are certain. Retracting a success message is far worse than a short wait.</p>
+</section>
+
+<section id="receiving">
+<h2>Receiving money from another bank</h2>
+
+<p>Money coming <em>in</em> works too — but there is one honest weakness worth understanding, because it is the main thing our team has to engineer around.</p>
+
+<p>When somebody at Access Bank sends ₦50,000 to a BravePay customer, it travels over NIBSS and lands in that customer's account at BankOne. <strong>The money arrives correctly and is never at risk.</strong></p>
+
+<p>The problem is that <strong>BankOne does not tell us it happened.</strong> Most modern systems send an automatic alert the moment something changes. BankOne has no such feature — we reviewed all 78 pages of their documentation and there is nothing of the kind.</p>
+
+<div class="split">
+  <div class="half">
+    <h4>How it should work</h4>
+    <ul>
+      <li>Money arrives.</li>
+      <li>BankOne immediately tells BravePay.</li>
+      <li>Customer gets an instant alert.</li>
+    </ul>
+  </div>
+  <div class="half">
+    <h4>How it actually works</h4>
+    <ul>
+      <li>Money arrives.</li>
+      <li>Silence.</li>
+      <li>BravePay has to keep asking "anything new?"</li>
+    </ul>
+  </div>
+</div>
+
+<p>So we have to <strong>poll</strong> — keep checking, over and over, for every account. Checking every account every minute would mean well over a million enquiries a day, which is expensive and slow.</p>
+
+<p>The practical answer is to check different accounts at different rates: customers using the app right now get checked every 30 to 60 seconds, recently active customers every ten minutes or so, and everyone else once overnight. That gives fast alerts to the people most likely to be waiting for money, without the cost of checking everyone constantly.</p>
+
+<div class="box wait">
+  <h4>The most valuable question we can ask Qore</h4>
+  <p>Before we build all that, we are asking BankOne directly: <strong>is there any way to be told automatically when money arrives?</strong> A feed, a file, anything not in the public documentation.</p>
+  <p>If the answer is yes, a meaningful chunk of engineering work disappears and customers get instant alerts. If the answer is no, we build the checking system described above. Either way it works — but the answer changes the cost, so we want it before we start.</p>
+</div>
+</section>
+
+<section id="wrong">
+<h2>What can go wrong, and what we do</h2>
+<p>Nothing here is unusual. Every bank deals with the same situations. The difference between a good system and a bad one is whether these were planned for or discovered live.</p>
+
+<div class="box">
+  <h4>The transfer is taking a long time</h4>
+  <p>Normal. Something in the chain is slow. We keep asking BankOne for the outcome and keep the customer informed. The money stays held, not returned, until we know.</p>
+</div>
+
+<div class="box">
+  <h4>We never got an answer</h4>
+  <p>We ask again, using exactly the same reference number, so BankOne knows it is the same instruction and does not perform it twice. This is why the reference matters — it is what prevents a repeated question turning into a repeated payment.</p>
+</div>
+
+<div class="box">
+  <h4>The customer taps send twice</h4>
+  <p>The second attempt is recognised as a duplicate and rejected automatically. The money can only leave once.</p>
+</div>
+
+<div class="box">
+  <h4>A payroll run has one bad account</h4>
+  <p>Each employee is treated separately. Thirty-nine people get paid and one is flagged, rather than the whole run failing.</p>
+</div>
+
+<div class="box warn">
+  <h4>A transfer to another bank needs reversing</h4>
+  <p>Once money has left for another bank, <strong>it cannot be pulled back automatically.</strong> BankOne is explicit about this, and our systems are built to refuse the attempt. Recovering it becomes a conversation between the two banks — which is exactly why the name-check in step 3 matters so much.</p>
+</div>
+
+<div class="box good">
+  <h4>Every day, we check the books agree</h4>
+  <p>Once a day, automatically, we compare our records against BankOne's — every account, every transaction, every balance. Anything that does not match becomes a job for a person to look at, and it is never quietly corrected. This is standard banking practice and it is how problems get found in hours rather than months.</p>
+</div>
+</section>
+
+<section id="means">
+<h2>What this means for BravePay</h2>
+
+<p>Choosing BankOne is a decision about what we stop building.</p>
+
+<div class="split">
+  <div class="half">
+    <h4>BankOne now handles</h4>
+    <ul>
+      <li>Real account numbers</li>
+      <li>Balances and the official ledger</li>
+      <li>Transfers between banks</li>
+      <li>Cards</li>
+      <li>Loans, fixed deposits, standing orders</li>
+      <li>Freezing accounts and placing holds</li>
+      <li>Monthly reports to the CBN and NDIC</li>
+    </ul>
+  </div>
+  <div class="half">
+    <h4>BravePay keeps building</h4>
+    <ul>
+      <li>The app and everything customers see</li>
+      <li>Login, PIN, fingerprint, devices</li>
+      <li>Invoicing, payroll, expenses, budgets</li>
+      <li>Notifications</li>
+      <li>The admin and support console</li>
+      <li>Fraud rules and spending insights</li>
+      <li>Daily checking of the books</li>
+    </ul>
+  </div>
+</div>
+
+<p>The left-hand column is work we no longer have to do, maintain, or defend to a regulator. The right-hand column is what actually makes BravePay different from every other bank app — and it is entirely ours.</p>
+
+<p class="pull">BankOne owns the money. BravePay owns everything that is not money.</p>
+</section>
+
+<section id="gloss">
+<h2>Glossary</h2>
+<dl class="gloss">
+  <dt>API</dt>
+  <dd>The way two computer systems talk to each other — one asks a question, the other answers.</dd>
+  <dt>HTTP / HTTPS</dt>
+  <dd>The language of those messages. HTTPS is the sealed, scrambled version. HTTP is the postcard.</dd>
+  <dt>NIBSS</dt>
+  <dd>Nigeria Inter-Bank Settlement System. The shared national infrastructure that carries money between banks.</dd>
+  <dt>NIP</dt>
+  <dd>NIBSS Instant Payment. The service that makes bank transfers arrive in seconds.</dd>
+  <dt>NUBAN</dt>
+  <dd>The standard 10-digit Nigerian account number. Only a licensed core banking system can issue a valid one.</dd>
+  <dt>BVN</dt>
+  <dd>Bank Verification Number. One identity, shared across all banks, tied to a person's fingerprints.</dd>
+  <dt>Core banking system</dt>
+  <dd>The engine that holds accounts, balances and the official ledger. Ours is BankOne.</dd>
+  <dt>Ledger</dt>
+  <dd>The formal record of every movement of money. What an auditor or regulator asks to see.</dd>
+  <dt>Reconciliation</dt>
+  <dd>Comparing two sets of records to prove they agree. Done daily.</dd>
+  <dt>Settlement</dt>
+  <dd>The behind-the-scenes squaring-up between banks. Customers see money instantly; the banks settle up separately.</dd>
+  <dt>Polling</dt>
+  <dd>Repeatedly asking "has anything changed?" because the other system will not tell you on its own.</dd>
+</dl>
+</section>
+
+<section id="next">
+<h2>What we need answered before we build</h2>
+<p>Three questions to Qore, in writing. Everything else can proceed while we wait.</p>
+<ol>
+  <li><strong>Is there any way to be told automatically when money arrives?</strong> Changes how much we build and how fast customers get alerts.</li>
+  <li><strong>Is the live connection available in the secure, sealed form?</strong> The documentation says otherwise, and we need that in writing before handling real customer data.</li>
+  <li><strong>Where is our data physically stored?</strong> From 1 January 2027, Nigerian payment data has to stay in Nigeria.</li>
+</ol>
+<p>And one for our own institution: <strong>is our microfinance bank fully registered on NIBSS</strong>, with a bank code and a settlement arrangement in place? Transfers do not work without it, and it is not something engineering can solve.</p>
+</section>
+
+<footer>
+<p>This briefing summarises a longer technical blueprint written for the engineering team, which sets out the same arrangement in implementation detail. Findings about BankOne come from a complete reading of its published API documentation; findings about BravePay come from a direct review of our own systems. Anything not confirmable from those sources is flagged in this document as a question rather than presented as fact.</p>
+<p>Prepared for the BravePay team · 3 September 2026</p>
+</footer>
+
+</div>
+</body>
+</html>

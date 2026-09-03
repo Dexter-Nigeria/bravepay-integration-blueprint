@@ -8,7 +8,18 @@ banking engine, with **NIBSS** providing the payment rails.
 
 Or open `index.html` locally; it is a single self-contained file.
 
-## What this is
+## Two documents
+
+| Document | Audience | File |
+|---|---|---|
+| **[How BravePay Moves Money](https://claude.ai/code/artifact/bea92fd6-cd1d-44da-a5f3-9599f116b599)** | Non-technical — board, ops, commercial, support | `explainer.html` |
+| **[Integration Blueprint](https://claude.ai/code/artifact/45807891-1789-400b-98ad-7c31c00897b0)** | Engineering | `index.html` |
+
+The explainer covers the same arrangement in ordinary language: who does what, how
+BankOne reaches NIBSS, how BravePay reaches BankOne, and why the HTTP/HTTPS question
+matters. No technical background needed.
+
+## What the blueprint is
 
 A build-ready document for the engineering team, not an overview. It covers:
 
